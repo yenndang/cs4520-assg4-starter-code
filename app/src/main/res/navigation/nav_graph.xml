@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name= "com.cs4520.assignment1.LoginFragment"
+        android:name= "com.cs4520.assignment4.ui.LoginFragment"
         android:label="LoginFragment">
         <action
             android:id="@+id/action_loginFragment_to_productListFragment"
