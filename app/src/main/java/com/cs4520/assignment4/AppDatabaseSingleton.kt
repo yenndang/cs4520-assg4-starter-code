@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.cs4520.assignment4.repository.AppDatabase
 
 object AppDatabaseSingleton {
+    @Volatile
     private var INSTANCE: AppDatabase? = null
 
     fun getDatabase(context: Context): AppDatabase {
@@ -12,7 +13,7 @@ object AppDatabaseSingleton {
             val instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
-                "app_database"
+                "assignment4_database"
             ).build()
             INSTANCE = instance
             instance

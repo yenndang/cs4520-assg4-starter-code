@@ -1,41 +1,3 @@
-//package com.cs4520.assignment1
-//
-//import android.os.Bundle
-//import android.view.LayoutInflater
-//import android.view.View
-//import android.view.ViewGroup
-//import androidx.fragment.app.Fragment
-//import androidx.recyclerview.widget.LinearLayoutManager
-//import com.cs4520.assignment4.ui.ProductAdapter
-//import com.cs4520.assignment4.databinding.FragmentProductListBinding
-//
-//class ProductListFragment : Fragment() {
-//
-//    private var _binding: FragmentProductListBinding? = null
-//    private val binding get() = _binding!!
-//
-//    private lateinit var productAdapter: ProductAdapter
-//
-//    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-//        _binding = FragmentProductListBinding.inflate(inflater, container, false)
-//        return binding.root
-//    }
-//
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//        setupRecyclerView()
-//    }
-//
-//    private fun setupRecyclerView() {
-//        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-//        binding.recyclerView.adapter = ProductAdapter(emptyList())
-//    }
-//
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
-//}
 package com.cs4520.assignment4.ui
 
 import android.os.Bundle
@@ -45,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.cs4520.assignment4.AppDatabaseSingleton
 import com.cs4520.assignment4.databinding.FragmentProductListBinding
 import com.cs4520.assignment4.repository.ProductRepository
 import com.cs4520.assignment4.ui.viewmodel.ProductViewModel
@@ -59,8 +22,14 @@ class ProductListFragment : Fragment() {
     private val productAdapter by lazy { ProductAdapter(emptyList()) }
 
     // Use the 'by viewModels()' Kotlin property delegate for ViewModel initialization
+
     private val productViewModel: ProductViewModel by viewModels {
-        ProductViewModelFactory(ProductRepository())
+        // You need to get the ProductDao from the Room database instance, which requires a Context
+        val productDao = AppDatabaseSingleton.getDatabase(requireContext()).productDao()
+        // Then you create a ProductRepository with that ProductDao
+        val productRepository = ProductRepository(productDao)
+        // Finally, you create the ViewModelFactory with the repository
+        ProductViewModelFactory(productRepository)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -83,18 +52,30 @@ class ProductListFragment : Fragment() {
 
     private fun observeViewModel() {
         productViewModel.products.observe(viewLifecycleOwner) { products ->
-            // Update the RecyclerView adapter's dataset
-            productAdapter.updateProducts(products)
+            if (products.isNullOrEmpty()) {
+                binding.textViewEmpty.visibility = View.VISIBLE // Show "No products available"
+                binding.recyclerView.visibility = View.GONE // Hide RecyclerView
+            } else {
+                binding.textViewEmpty.visibility = View.GONE // Hide "No products available"
+                binding.recyclerView.visibility = View.VISIBLE // Show RecyclerView
+                productAdapter.updateProducts(products) // Update the RecyclerView adapter's dataset
+            }
+            binding.progressBar.visibility = View.GONE
         }
 
         productViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            // Show or hide the ProgressBar based on the loading state
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            if (isLoading) {
+                binding.progressBar.visibility = View.VISIBLE
+                binding.textViewEmpty.visibility = View.GONE // Optionally hide the empty view when loading starts
+            } else {
+                binding.progressBar.visibility = View.GONE
+            }
         }
 
         // Trigger loading products from the ViewModel
         productViewModel.getProducts()
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
