@@ -13,6 +13,7 @@ class ProductRepository(private val productDao: ProductDao) {
     // LiveData for observing the product list from the database
     val allProducts: LiveData<List<ProductEntity>> = productDao.getAllProducts()
 
+
     suspend fun getProducts(page: Int? = null): Response<List<Product>> = withContext(Dispatchers.IO) {
         val response = RetrofitInstance.apiService.getProducts(page)
         if (response.isSuccessful) {
@@ -46,4 +47,5 @@ class ProductRepository(private val productDao: ProductDao) {
             productDao.deleteAllProducts()
         }
     }
+
 }
