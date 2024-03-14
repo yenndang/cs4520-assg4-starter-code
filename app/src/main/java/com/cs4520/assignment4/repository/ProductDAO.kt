@@ -19,9 +19,9 @@ interface ProductDao {
     @Query("DELETE FROM products")
     suspend fun deleteAllProducts()
 
-    @Transaction // all operations inside are run atomically
-    suspend fun clearAndCacheProducts(products: List<ProductEntity>) {
-        deleteAllProducts()
-        insertAll(products)
-    }
+//    @Transaction // all operations inside are run atomically
+//    suspend fun clearAndCacheProducts(products: List<ProductEntity>) {
+//        deleteAllProducts()
+//        insertAll(products)
+//    }
 }

@@ -27,7 +27,7 @@ class ProductRepository(private val productDao: ProductDao) {
                     )
                 }
                 // Use the atomic operation
-                productDao.clearAndCacheProducts(productsToCache)
+                productDao.insertAll(productsToCache)
                 Log.d("ProductRepository", "Saving ${productsToCache.size} products")
             }
         }
