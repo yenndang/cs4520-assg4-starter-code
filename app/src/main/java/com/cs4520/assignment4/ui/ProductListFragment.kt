@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.cs4520.assignment4.AppDatabaseSingleton
+import com.cs4520.assignment4.api.AppDatabaseSingleton
 import com.cs4520.assignment4.databinding.FragmentProductListBinding
 import com.cs4520.assignment4.repository.ProductRepository
 import com.cs4520.assignment4.ui.viewmodel.ProductViewModel

@@ -1,4 +1,4 @@
-package com.cs4520.assignment4
+package com.cs4520.assignment4.api
 
 import android.content.Context
 import androidx.room.Room
