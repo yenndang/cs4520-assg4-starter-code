@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.cs4520.assignment4.models.Product
 import com.cs4520.assignment4.models.ProductEntity
 import com.cs4520.assignment4.repository.ProductRepository
-import com.cs4520.assignment4.utils.NetworkUtils
+import com.cs4520.assignment4.NetworkUtils
 import kotlinx.coroutines.launch
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
