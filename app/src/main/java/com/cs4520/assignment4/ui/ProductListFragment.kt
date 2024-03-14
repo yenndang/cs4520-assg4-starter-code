@@ -27,8 +27,8 @@ class ProductListFragment : Fragment() {
     private val productViewModel: ProductViewModel by viewModels {
         // Get the ProductDao from the Room database instance, which requires a Context
         val productDao = AppDatabaseSingleton.getDatabase(requireContext()).productDao()
-        // Create a ProductRepository with that ProductDao
-        val productRepository = ProductRepository(productDao)
+        // Pass both productDao and context to the ProductRepository
+        val productRepository = ProductRepository(productDao, requireContext())
         // Create the ViewModelFactory with the repository
         ProductViewModelFactory(productRepository)
     }
@@ -75,7 +75,7 @@ class ProductListFragment : Fragment() {
         }
 
         // Trigger loading products from the ViewModel
-        productViewModel.getProducts(requireContext())
+        productViewModel.getProducts(1)
     }
 
 

@@ -15,53 +15,21 @@ import kotlinx.coroutines.launch
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
 
     private val _products = MutableLiveData<List<Product>>()
-    val products: LiveData<List<Product>> = _products
+    val products: LiveData<List<Product>> get() = _products
 
     private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    val isLoading: LiveData<Boolean> get() = _isLoading
 
-
-    private val cachedProductsObserver = Observer<List<ProductEntity>> { cachedProducts ->
-        val productModelList = cachedProducts.map { entity ->
-            Product(
-                name = entity.name,
-                price = entity.price,
-                expiryDate = entity.expiryDate,
-                type = entity.type
-            )
-        }
-        _products.postValue(productModelList)
-    }
-
-    fun getProducts(context: Context, page: Int? = null) {
+    fun getProducts(page: Int? = null) {
         _isLoading.value = true
-        if (NetworkUtils.isNetworkAvailable(context)) {
-            viewModelScope.launch {
-                try {
-                    val response = repository.getProducts(page)
-                    if (response.isSuccessful && response.body() != null) {
-                        _products.postValue(response.body())
-                    } else {
-                        _products.postValue(emptyList())
-                    }
-                } catch (e: Exception) {
-                    _products.postValue(emptyList())
-                } finally {
-                    _isLoading.postValue(false)
-                }
-            }
-        } else {
-            viewModelScope.launch {
-                repository.getCachedProducts().observeForever(cachedProductsObserver)
+        viewModelScope.launch {
+            val productLiveData = repository.getProducts(page)
+            productLiveData.observeForever { productList ->
+                _products.postValue(productList)
+                _isLoading.postValue(false)
             }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        // Clean up the observer to prevent memory leaks
-        repository.getCachedProducts().removeObserver(cachedProductsObserver)
-    }
 }
-
 
