@@ -1,4 +1,4 @@
-package com.cs4520.assignment4.utils
+package com.cs4520.assignment4
 
 import android.content.Context
 import android.net.ConnectivityManager

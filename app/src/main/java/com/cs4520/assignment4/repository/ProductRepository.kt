@@ -1,5 +1,6 @@
 package com.cs4520.assignment4.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.cs4520.assignment4.api.RetrofitInstance
 import com.cs4520.assignment4.models.Product
@@ -27,6 +28,7 @@ class ProductRepository(private val productDao: ProductDao) {
                 }
                 // Use the atomic operation
                 productDao.clearAndCacheProducts(productsToCache)
+                Log.d("ProductRepository", "Saving ${productsToCache.size} products")
             }
         }
         response

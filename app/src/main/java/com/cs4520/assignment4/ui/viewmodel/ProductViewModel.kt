@@ -3,6 +3,7 @@ package com.cs4520.assignment4.ui.viewmodel
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cs4520.assignment4.models.Product
@@ -19,14 +20,23 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    val cachedProducts: LiveData<List<ProductEntity>> = repository.getCachedProducts()
 
+    private val cachedProductsObserver = Observer<List<ProductEntity>> { cachedProducts ->
+        val productModelList = cachedProducts.map { entity ->
+            Product(
+                name = entity.name,
+                price = entity.price,
+                expiryDate = entity.expiryDate,
+                type = entity.type
+            )
+        }
+        _products.postValue(productModelList)
+    }
 
     fun getProducts(context: Context, page: Int? = null) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            if (NetworkUtils.isNetworkAvailable(context)) {
-                // Existing network request logic
+        _isLoading.value = true
+        if (NetworkUtils.isNetworkAvailable(context)) {
+            viewModelScope.launch {
                 try {
                     val response = repository.getProducts(page)
                     if (response.isSuccessful && response.body() != null) {
@@ -34,25 +44,24 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
                     } else {
                         _products.postValue(emptyList())
                     }
+                } catch (e: Exception) {
+                    _products.postValue(emptyList())
                 } finally {
                     _isLoading.postValue(false)
                 }
-            } else {
-                // Convert ProductEntity to Product before posting
-                val cachedProducts = repository.getCachedProducts().value
-                val productModelList = cachedProducts?.map { entity ->
-                    Product(
-                        name = entity.name,
-                        price = entity.price,
-                        expiryDate = entity.expiryDate,
-                        type = entity.type
-                    )
-                } ?: emptyList()
-
-                _products.postValue(productModelList)
             }
-            _isLoading.value = false
+        } else {
+            viewModelScope.launch {
+                repository.getCachedProducts().observeForever(cachedProductsObserver)
+            }
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up the observer to prevent memory leaks
+        repository.getCachedProducts().removeObserver(cachedProductsObserver)
+    }
 }
+
+

@@ -1,6 +1,7 @@
 package com.cs4520.assignment4.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,11 +25,11 @@ class ProductListFragment : Fragment() {
     // Use the 'by viewModels()' Kotlin property delegate for ViewModel initialization
 
     private val productViewModel: ProductViewModel by viewModels {
-        // You need to get the ProductDao from the Room database instance, which requires a Context
+        // Get the ProductDao from the Room database instance, which requires a Context
         val productDao = AppDatabaseSingleton.getDatabase(requireContext()).productDao()
-        // Then you create a ProductRepository with that ProductDao
+        // Create a ProductRepository with that ProductDao
         val productRepository = ProductRepository(productDao)
-        // Finally, you create the ViewModelFactory with the repository
+        // Create the ViewModelFactory with the repository
         ProductViewModelFactory(productRepository)
     }
 
@@ -52,6 +53,7 @@ class ProductListFragment : Fragment() {
 
     private fun observeViewModel() {
         productViewModel.products.observe(viewLifecycleOwner) { products ->
+            Log.d("ProductListFragment", "Observing ${products.size} products")
             if (products.isNullOrEmpty()) {
                 binding.textViewEmpty.visibility = View.VISIBLE // Show "No products available"
                 binding.recyclerView.visibility = View.GONE // Hide RecyclerView
