@@ -13,11 +13,9 @@ class ProductRepository(private val productDao: ProductDao) {
     // LiveData for observing the product list from the database
     val allProducts: LiveData<List<ProductEntity>> = productDao.getAllProducts()
 
-
     suspend fun getProducts(page: Int? = null): Response<List<Product>> = withContext(Dispatchers.IO) {
         val response = RetrofitInstance.apiService.getProducts(page)
         if (response.isSuccessful) {
-            // Convert the network model to the database entity and insert
             response.body()?.let { networkProducts ->
                 val productsToCache = networkProducts.map {
                     ProductEntity(
@@ -27,10 +25,8 @@ class ProductRepository(private val productDao: ProductDao) {
                         type = it.type
                     )
                 }
-                // Clear old data
-                productDao.deleteAllProducts()
-                // Cache new data
-                productDao.insertAll(productsToCache)
+                // Use the atomic operation
+                productDao.clearAndCacheProducts(productsToCache)
             }
         }
         response
@@ -39,13 +35,6 @@ class ProductRepository(private val productDao: ProductDao) {
     // Method to fetch products from the database
     fun getCachedProducts(): LiveData<List<ProductEntity>> {
         return allProducts
-    }
-
-    // Helper function to clear cached products
-    suspend fun clearCachedProducts() {
-        withContext(Dispatchers.IO) {
-            productDao.deleteAllProducts()
-        }
     }
 
 }

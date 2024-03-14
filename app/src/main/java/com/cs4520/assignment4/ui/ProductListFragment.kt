@@ -73,7 +73,7 @@ class ProductListFragment : Fragment() {
         }
 
         // Trigger loading products from the ViewModel
-        productViewModel.getProducts()
+        productViewModel.getProducts(requireContext())
     }
 
 
